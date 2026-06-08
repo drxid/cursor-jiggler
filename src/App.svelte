@@ -48,6 +48,9 @@
 
   const isMac =
     typeof navigator !== "undefined" && /Mac OS X|Macintosh/.test(navigator.userAgent);
+  if (isMac && typeof document !== "undefined") {
+    document.documentElement.classList.add("mac");
+  }
 
   const presetValues = [30, 60, 180, 300];
   const presetLabel = (v: number) =>
@@ -236,14 +239,6 @@
 <main class="window">
   <!-- Custom titlebar: traffic lights (left) on macOS, caption buttons (right) on Windows/Linux -->
   <div class="titlebar" data-tauri-drag-region>
-    {#if isMac}
-      <div class="mac-lights">
-        <button class="light red" aria-label="close" onclick={() => appWin.hide()}></button>
-        <button class="light yellow" aria-label="minimize" onclick={() => appWin.minimize()}></button>
-        <span class="light green"></span>
-      </div>
-    {/if}
-
     <button
       class="icon-btn gear {isMac ? 'mac' : 'win'}"
       title={view === "main" ? t.settings : t.back}
@@ -455,31 +450,14 @@
     pointer-events: none;
   }
 
-  /* macOS traffic lights */
-  .mac-lights {
-    position: absolute;
-    left: 14px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .light {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
+  /* macOS: the native title bar provides the traffic lights and rounded
+     corners, so the card fills the window with no CSS radius/border. */
+  :global(html.mac) .window {
+    border-radius: 0;
     border: none;
-    padding: 0;
-    cursor: pointer;
   }
-  .light.red {
-    background: #ff5f57;
-  }
-  .light.yellow {
-    background: #febc2e;
-  }
-  .light.green {
-    background: #28c840;
-    cursor: default;
+  :global(html.mac) .gear.mac {
+    border-top-right-radius: 0;
   }
 
   /* Windows caption buttons */

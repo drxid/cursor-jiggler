@@ -9,7 +9,7 @@ use tauri::{
     image::Image,
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Emitter, Manager, State, WindowEvent, Wry,
+    AppHandle, Emitter, Manager, State, WebviewUrl, WebviewWindowBuilder, WindowEvent, Wry,
 };
 use tauri_plugin_store::StoreExt;
 
@@ -160,7 +160,13 @@ impl IdleTracker {
         win_idle_seconds()
     }
 
-    #[cfg(not(windows))]
+    #[cfg(target_os = "macos")]
+    fn seconds(&mut self) -> u64 {
+        mac_idle_seconds()
+    }
+
+    // Linux / other: approximate idle by watching the cursor between ticks.
+    #[cfg(all(not(windows), not(target_os = "macos")))]
     fn seconds(&mut self) -> u64 {
         if let Ok(mut enigo) = Enigo::new(&Settings::default()) {
             if let Ok(pos) = enigo.location() {
@@ -177,6 +183,25 @@ impl IdleTracker {
     fn reset(&mut self) {
         self.idle = 0;
         self.last_pos = None;
+    }
+}
+
+/// System-wide idle time in seconds (macOS) via CoreGraphics. Unlike reading the
+/// cursor with enigo, this does NOT require Accessibility permission, so the
+/// countdown keeps working even before/without the mouse-control grant.
+#[cfg(target_os = "macos")]
+fn mac_idle_seconds() -> u64 {
+    #[link(name = "CoreGraphics", kind = "framework")]
+    extern "C" {
+        fn CGEventSourceSecondsSinceLastEventType(state_id: u32, event_type: u32) -> f64;
+    }
+    const HID_SYSTEM_STATE: u32 = 1; // kCGEventSourceStateHIDSystemState
+    const ANY_INPUT: u32 = 0xFFFF_FFFF; // kCGAnyInputEventType
+    let secs = unsafe { CGEventSourceSecondsSinceLastEventType(HID_SYSTEM_STATE, ANY_INPUT) };
+    if secs.is_finite() && secs > 0.0 {
+        secs as u64
+    } else {
+        0
     }
 }
 
@@ -367,6 +392,29 @@ pub fn run() {
         .manage(core.clone())
         .setup(move |app| {
             let handle = app.handle().clone();
+
+            // Create the main window per-platform: native title bar (real traffic
+            // lights, native rounded corners, zoom auto-disabled because the window
+            // isn't resizable) on macOS; a custom frameless transparent window on
+            // Windows/Linux. Starts hidden; shown below unless auto-started minimized.
+            {
+                let builder = WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+                    .title("Cursor Jiggler")
+                    .inner_size(420.0, 460.0)
+                    .resizable(false)
+                    .visible(false)
+                    .center();
+
+                #[cfg(target_os = "macos")]
+                let builder = builder
+                    .title_bar_style(tauri::TitleBarStyle::Overlay)
+                    .hidden_title(true);
+
+                #[cfg(not(target_os = "macos"))]
+                let builder = builder.decorations(false).transparent(true).shadow(false);
+
+                builder.build()?;
+            }
 
             // Restore saved settings.
             if let Ok(store) = app.store(STORE_FILE) {
