@@ -12,6 +12,7 @@
   import { openUrl } from "@tauri-apps/plugin-opener";
   import { check } from "@tauri-apps/plugin-updater";
   import { relaunch } from "@tauri-apps/plugin-process";
+  import { getVersion } from "@tauri-apps/api/app";
   import { onMount, tick } from "svelte";
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
@@ -38,6 +39,7 @@
     "idle" | "checking" | "available" | "downloading" | "uptodate" | "error"
   >("idle");
   let updateVersion = $state("");
+  let appVersion = $state("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let pendingUpdate: any = null;
 
@@ -127,6 +129,9 @@
     } catch (_) {
       /* plugin unavailable in some environments */
     }
+    getVersion()
+      .then((v) => (appVersion = v))
+      .catch(() => {});
 
     // Language: restore the saved choice or fall back to the system locale.
     try {
@@ -382,7 +387,7 @@
       <div class="note">{t.note}</div>
 
       <div class="footer">
-        Cursor Jiggler · v1.0 · <button class="link" onclick={() => openUrl("https://drxid.ru/")}>drxid</button>
+        Cursor Jiggler{appVersion ? ` · v${appVersion}` : ""} · <button class="link" onclick={() => openUrl("https://drxid.ru/")}>drxid</button>
       </div>
     {:else}
       <!-- Language selection (scrolls; never stretches the window) -->

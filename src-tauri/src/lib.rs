@@ -351,6 +351,11 @@ pub fn run() {
     core.remaining.store(DEFAULT_INTERVAL, Ordering::Relaxed);
 
     tauri::Builder::default()
+        // Must be the first plugin: a second launch focuses the existing window
+        // instead of spawning another instance.
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            show_window(app);
+        }))
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec!["--autostarted"]),
