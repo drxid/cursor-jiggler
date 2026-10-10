@@ -28,4 +28,4 @@ src-tauri/target
 .tauri/
 
 # Local/dev test screenshots
-reference/_*.png
+reference/

@@ -1,4 +1,4 @@
-# <img src="reference/app-icon-white.svg" width="36" align="absmiddle" alt="" /> Cursor Jiggler
+# <img src="src-tauri/app-icon.svg" width="36" align="absmiddle" alt="" /> Cursor Jiggler
 
 A tiny, pretty, cross‑platform mouse jiggler. It keeps your computer awake and your status active by nudging the cursor — but only when you're **idle**, so it never gets in the way while you're actually working.
 

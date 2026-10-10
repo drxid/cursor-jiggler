@@ -1,7 +1,7 @@
 import { Resvg } from "@resvg/resvg-js";
 import { readFileSync, writeFileSync } from "node:fs";
 
-const svg = readFileSync("reference/app-icon-white.svg", "utf8");
+const svg = readFileSync("src-tauri/app-icon.svg", "utf8");
 
 function render(size, out) {
   const r = new Resvg(svg, { fitTo: { mode: "width", value: size } });
