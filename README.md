@@ -3,7 +3,7 @@
 A tiny, pretty, cross‑platform mouse jiggler. It keeps your computer awake and your status active by nudging the cursor — but only when you're **idle**, so it never gets in the way while you're actually working.
 
 <p align="center">
-  <img src="docs/screenshot.png" width="420" alt="Cursor Jiggler window" />
+  <img src="docs/demo.webp" width="420" alt="Cursor Jiggler window" />
 </p>
 
 ## Features
