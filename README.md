@@ -6,6 +6,10 @@ A tiny, pretty, cross‑platform mouse jiggler. It keeps your computer awake and
   <img src="reference/app-icon-white.svg" width="96" alt="Cursor Jiggler icon" />
 </p>
 
+<p align="center">
+  <img src="docs/screenshot.png" width="420" alt="Cursor Jiggler window" />
+</p>
+
 ## Features
 
 - **Idle‑aware** — only moves the cursor after N seconds of no activity; any input resets the timer.
